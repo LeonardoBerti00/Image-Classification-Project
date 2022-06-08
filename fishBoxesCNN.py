@@ -17,12 +17,8 @@ batchSize = 16
 epochs = 3
 learningRate = 1e-4
 momentum = 0.1
-width = 400     # 800
-height = 237    # 474
-
-# DA PROVARE: mettere nel database anche le immagini girate
-# giocare un po' con le immagini (colore, gaussian)
-# provare in grayscale e anche aumentare il contrasto
+width = 227     # 227
+height = 155    # 155
 
 # Aggiungere più immagini per le classi con pochi sample (shark, DOL)
 
