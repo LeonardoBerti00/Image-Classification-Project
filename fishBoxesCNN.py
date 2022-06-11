@@ -127,7 +127,7 @@ def ComputeMeanandSTD(dataloader):  #function to compute Mean and STD to normali
   print('std:  '  + str(std))
   return mean, std
 
-ComputeMeanandSTD(train_size)
+#ComputeMeanandSTD(train_size)
 
 
 
