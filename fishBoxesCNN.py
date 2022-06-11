@@ -13,7 +13,7 @@ torch.cuda.empty_cache()
 # accuracy: 60.6% without NoF
 # accuracy: 54.1% with NoF
 
-batchSize = 16
+batchSize = 8
 epochs = 3
 learningRate = 1e-4
 momentum = 0.1
@@ -49,7 +49,8 @@ class fishDataset(Dataset):
 
         # reading the image
         img_path = self.img_dir + str(label) + "/" + str(image)
-        img = read_image(img_path)
+        imgg = read_image(img_path)
+        img = imgg.float() / 255
         # print("{}\t{}".format(img_path, img.shape), end="\n")
 
         if self.transforms:
@@ -98,19 +99,42 @@ transformation = T.Compose([
     T.RandomAffine(degrees=0.0, translate=(0.1, 0.3)),
     # T.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.5),
     T.Grayscale(),
-    T.ToTensor()])
+    T.ToTensor(),
+    T.Normalize((0.4219), (0.2113))])
 
 dataset = fishDataset("FishBoxes/Fishes/",
                       "FishBoxes/labels.csv", trans=transformation)
 
 train_size = int(0.8 * len(dataset))
 test_size = len(dataset) - train_size
-training_data, test_data = torch.utils.data.random_split(
-    dataset, [train_size, test_size])
+training_data, test_data = torch.utils.data.random_split(dataset, [train_size, test_size])
 
-train_dataloader = DataLoader(
-    training_data, batch_size=batchSize, shuffle=True)
+train_dataloader = DataLoader(training_data, batch_size=batchSize, shuffle=True)
 test_dataloader = DataLoader(test_data, batch_size=batchSize, shuffle=False)
+
+
+def ComputeMeanandSTD(dataloader):  #function to compute Mean and STD to normalize
+      #to Normalize = x - mean / std
+  channels_sum, channels_squared_sum, num_batches = 0, 0, 0
+  for data, _ in dataloader:
+      # Mean over batch, height and width, but not over the channels
+      channels_sum += torch.mean(data, dim=[0,2,3])
+      channels_squared_sum += torch.mean(data**2, dim=[0,2,3])
+      num_batches += 1
+      
+  mean = channels_sum / num_batches
+
+  # std = sqrt(E[X^2] - (E[X])^2)
+  std = (channels_squared_sum / num_batches - mean ** 2) ** 0.5
+  # output
+  print('mean: '  + str(mean))
+  print('std:  '  + str(std))
+  return mean, std
+
+ComputeMeanandSTD(train_size)
+
+
+
 
 # define the device for the computation
 device = "cuda" if torch.cuda.is_available() else "cpu"
