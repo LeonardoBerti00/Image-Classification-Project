@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class Net(nn.Module):
+class SimpleModel(nn.Module):
     def __init__(self):
         super().__init__()
 
@@ -22,11 +22,3 @@ class Net(nn.Module):
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
         return x
-
-
-
-    def forward(self, x):
-        out = self.vgg(x)
-        out = torch.flatten(out, 1)
-        out = self.dense(out)
-        return out

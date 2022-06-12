@@ -1,14 +1,13 @@
-import numpy as np
-import matplotlib.pyplot as plt
-import torch
-import torchvision
-import torchvision.transforms as T
 from fishDataset import fishDataset
-from torch.utils.data import Dataset, DataLoader
-from CNNmodels import *
+import torch
+import torchvision.transforms as T
+from torch.utils.data import DataLoader
 import torch.optim as optim
 from math import floor
 import time
+from fishDataset import fishDataset
+from CNNmodel import SimpleModel
+import os
 
 
 def trainModelOnData(trainLoader, model, epochs=10, batch_size=32, lrate=0.001, momen=0.9, device="cpu", testLoader=False):
@@ -130,11 +129,11 @@ def loadFishDataset(imagesPath, labelsPath, split=0.8, transformations=[], numWo
 
 if __name__ == "__main__":
     # standardizzare i dati di test e di train (in csv separati così i risultati dovrebbero essere più consistenti)
-    model = Net()   # Net() or vgg16()
+    model = SimpleModel()
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     dataSplit = 0.8
     numWorkers = 0  # [0..6]
-    epochs = 20
+    epochs = 30
     batch_size = 64
     imgWidth = 227
     imgHeight = 155
@@ -143,7 +142,7 @@ if __name__ == "__main__":
     transformations = []
     testWhileTraining = True
     saveModel = True
-    modelName = "net_20e"
+    modelName = "simpleModel"
 
     trainloader, testloader = loadFishDataset(
         "FishBoxes/Fishes/", "FishBoxes/labels.csv", dataSplit, transformations, numWorkers)
@@ -161,7 +160,22 @@ if __name__ == "__main__":
         f'Accuracy of the final network on the test images: {accuracy:.1f} %')
 
     if saveModel:
-        path = "./2.0/savedModels/" + modelName + \
-            "_" + str(floor(accuracy)) + "%.pth"
-        torch.save(model.state_dict(), path)
-        print("Saved model to: " + path)
+        modelName = f'{modelName}_{accuracy:.1f}%'
+        savePath = "./SavedModels/" + modelName
+        if not os.path.exists(savePath):
+            os.makedirs(savePath)
+
+        with open(savePath + "/" + modelName + ".txt", "w") as file:
+            file.write(
+                f'Accuracy of the final network on the test images: {accuracy} %\n\n')
+            file.write(f'Train and test data split: {dataSplit*100:.0f}%\n')
+            file.write(
+                f'Size of the images during the training is : {imgWidth}x{imgHeight}\n')
+            file.write(f'Epochs: {epochs}\n')
+            file.write(f'Batch size: {batch_size}\n')
+            file.write(f'Learning rate: {lrate}\n')
+            file.write(f'Momentum: {momentum}\n')
+            file.write(f'Transformations: {transformations.__str__()}\n')
+
+        torch.save(model.state_dict(), savePath + "/" + modelName + ".pth")
+        print("Saved model to: " + savePath + "/" + modelName + ".pth")
