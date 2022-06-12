@@ -12,22 +12,9 @@ import pandas as pd
 import time
 import copy
 import shutil
-from google.colab import drive
 from torchvision import models
-'''
-gpu_info = !nvidia-smi
-gpu_info = '\n'.join(gpu_info)
-if gpu_info.find('failed') >= 0:
-  print('Not connected to a GPU')
-else:
-  print(gpu_info)
-'''
-drive.mount('/content/drive')
+
 torch.cuda.empty_cache()
-#shutil.rmtree("FishBoxes/Fishes/ALB")
-#exit()
-# accuracy: 60.6% without NoF
-# accuracy: 54.1% with NoF
 
 batchSize = 8
 epochs = 20
@@ -38,9 +25,9 @@ height = 224   # 474  237
 num_classes = 8
 feature_extraction = True
 model_name = "vgg"
-rotation = True
+transformations = True       #if true we apply some transformations to the images
 training_size = 0.8
-normalization = True
+normalization = True         #if True we apply Normalization to the images
 
 print("Hyper Parameters")
 print(feature_extraction)
@@ -59,9 +46,8 @@ print(device)
 class fishDataset(Dataset):
     def __init__(self, img_dir, labels_dir, trans=None):
 
-        # labels stored in a csv file, each line has the form namefile,label
-        # img1.png,dog
-        # img2.png,cat
+        # labels stored in a csv file, each line has the form label, namefile
+
         self.labels = pd.read_csv(labels_dir)
         self.img_dir = img_dir
         self.transforms = trans
@@ -78,10 +64,10 @@ class fishDataset(Dataset):
 
         # reading the image
         img_path = self.img_dir + str(label) + "/" + str(image)
-        #img_path = self.img_dir + "/" + str(image)
+        
         img = read_image(img_path)
         img = img.float() / 255
-        #print("daje")
+  
         # print("{}\t{}".format(img_path, img.shape), end="\n")
 
         if self.transforms:
@@ -142,8 +128,8 @@ else:
       ])
 
 
-dataset = fishDataset("drive/MyDrive/Image-Classification-Project/FishBoxes/Fishes/",
-                      "drive/MyDrive/Image-Classification-Project/FishBoxes/labels.csv", trans=transformation)
+dataset = fishDataset("Image-Classification-Project/FishBoxes/Fishes/",
+                      "Image-Classification-Project/FishBoxes/labels.csv", trans=transformation)
 
 train_size = int(training_size * len(dataset))
 test_size = len(dataset) - train_size
@@ -161,70 +147,16 @@ def set_parameter_requires_grad(model, feature_extracting):
             param.requires_grad = False
 
 def initialize_model(model_name, num_classes, feature_extract=True, use_pretrained=True):
-    # Initialize these variables which will be set in this if statement. Each of these
-    #   variables is model specific.
     model_ft = None
     input_size = 0
 
-    if model_name == "resnet":
-        """ Resnet18
-        """
-        model_ft = models.resnet18(pretrained=use_pretrained)
-        set_parameter_requires_grad(model_ft, feature_extract)
-        num_ftrs = model_ft.fc.in_features
-        model_ft.fc = nn.Linear(num_ftrs, num_classes)
-        input_size = 224
-
-    elif model_name == "alexnet":
-        """ Alexnet
-        """
-        model_ft = models.alexnet(pretrained=use_pretrained)
-        set_parameter_requires_grad(model_ft, feature_extract)
-        num_ftrs = model_ft.classifier[6].in_features
-        model_ft.classifier[6] = nn.Linear(num_ftrs,num_classes)
-        input_size = 224
-
-    elif model_name == "vgg":
-        """ VGG11_bn
-        """
+    if model_name == "vgg":      #VGG11_bn
         model_ft = models.vgg11_bn(pretrained=use_pretrained)
         set_parameter_requires_grad(model_ft, feature_extract)
         num_ftrs = model_ft.classifier[6].in_features
         model_ft.classifier[6] = nn.Linear(num_ftrs,num_classes)
         input_size = 224
-
-    elif model_name == "squeezenet":
-        """ Squeezenet
-        """
-        model_ft = models.squeezenet1_0(pretrained=use_pretrained)
-        set_parameter_requires_grad(model_ft, feature_extract)
-        model_ft.classifier[1] = nn.Conv2d(512, num_classes, kernel_size=(1,1), stride=(1,1))
-        model_ft.num_classes = num_classes
-        input_size = 224
-
-    elif model_name == "densenet":
-        """ Densenet
-        """
-        model_ft = models.densenet121(pretrained=use_pretrained)
-        set_parameter_requires_grad(model_ft, feature_extract)
-        num_ftrs = model_ft.classifier.in_features
-        model_ft.classifier = nn.Linear(num_ftrs, num_classes)
-        input_size = 224
-
-    elif model_name == "inception":
-        """ Inception v3
-        Be careful, expects (299,299) sized images and has auxiliary output
-        """
-        model_ft = models.inception_v3(pretrained=use_pretrained)
-        set_parameter_requires_grad(model_ft, feature_extract)
-        # Handle the auxilary net
-        num_ftrs = model_ft.AuxLogits.fc.in_features
-        model_ft.AuxLogits.fc = nn.Linear(num_ftrs, num_classes)
-        # Handle the primary net
-        num_ftrs = model_ft.fc.in_features
-        model_ft.fc = nn.Linear(num_ftrs,num_classes)
-        input_size = 299
-
+        
     else:
         print("Invalid model name, exiting...")
         exit()
@@ -237,11 +169,10 @@ model_ft = model_ft.to(device)
 
 criterion = nn.CrossEntropyLoss()
 
-# Gather the parameters to be optimized/updated in this run. If we are
+#  Gather the parameters to be optimized/updated in this run. If we are
 #  finetuning we will be updating all parameters. However, if we are
 #  doing feature extract method, we will only update the parameters
-#  that we have just initialized, i.e. the parameters with requires_grad
-#  is True.
+#  that we have just initialized, i.e. the parameters with requires_grad is True.
 params_to_update = model_ft.parameters()
 print("Params to learn:")
 if feature_extraction:
@@ -255,10 +186,7 @@ else:
         if param.requires_grad == True:
             print("\t",name)
 
-# Observe that all parameters are being optimized
 optimizer_ft = optim.SGD(params_to_update, learningRate, momentum)
-
-
 
 def train_model(model, dataloaders, criterion, optimizer, num_epochs=5):
     since = time.time()
@@ -291,12 +219,10 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs=5):
                 optimizer.zero_grad()
 
                 # forward
-                # track history if only in train
+                
                 with torch.set_grad_enabled(phase == 'train'):
                     # Get model outputs and calculate loss
-                    # Special case for inception because in training it has an auxiliary output. In train
-                    #   mode we calculate the loss by summing the final output and the auxiliary output
-                    #   but in testing we only consider the final output.
+                   
                     outputs = model(inputs)
                     loss = criterion(outputs, labels)
 
