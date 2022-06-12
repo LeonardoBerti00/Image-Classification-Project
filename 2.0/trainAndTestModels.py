@@ -16,7 +16,7 @@ def trainModelOnData(trainLoader, model, epochs=10, batch_size=32, lrate=0.001, 
     Train a model on data
     :param trainLoader: data to train on
     :param model: model to train
-    :param epochs: number of epochs to train for
+    :param epochs: number of epochs to train
     :param batch_size: batch size to use
     :param lrate: learning rate to use
     :param momen: momentum to use for SGD

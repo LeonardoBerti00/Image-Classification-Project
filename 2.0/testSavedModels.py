@@ -47,30 +47,30 @@ net.load_state_dict(torch.load(PATH))
 net.to(device)
 
 
-def imshow(img):
-    invTrans = transforms.Compose([transforms.Normalize(mean=[0., 0., 0.],
-                                                        std=[1/0.2251, 1/0.2185, 1/0.2127]),
-                                   transforms.Normalize(mean=[-0.4042, -0.4353, -0.3998],
-                                                        std=[1., 1., 1.]),
-                                   ])
-    img = img.cpu()
-    img = invTrans(img)
-    npimg = img.numpy()
-    plt.imshow(np.transpose(npimg, (1, 2, 0)))
-    plt.show()
+# def imshow(img):
+#     invTrans = transforms.Compose([transforms.Normalize(mean=[0., 0., 0.],
+#                                                         std=[1/0.2251, 1/0.2185, 1/0.2127]),
+#                                    transforms.Normalize(mean=[-0.4042, -0.4353, -0.3998],
+#                                                         std=[1., 1., 1.]),
+#                                    ])
+#     img = img.cpu()
+#     img = invTrans(img)
+#     npimg = img.numpy()
+#     plt.imshow(np.transpose(npimg, (1, 2, 0)))
+#     plt.show()
 
 
-print('GroundTruth: ', ' '.join(f'{classes[labels[j]]:5s}' for j in range(4)))
-imshow(torchvision.utils.make_grid(images))
+# print('GroundTruth: ', ' '.join(f'{classes[labels[j]]:5s}' for j in range(4)))
+# imshow(torchvision.utils.make_grid(images))
 
-outputs = net(images)
+# outputs = net(images)
 
-outputs.to(device)
+# outputs.to(device)
 
-_, predicted = torch.max(outputs, 1)
+# _, predicted = torch.max(outputs, 1)
 
-print('Predicted: ', ' '.join(f'{classes[predicted[j]]:5s}'
-                              for j in range(4)))
+# print('Predicted: ', ' '.join(f'{classes[predicted[j]]:5s}'
+#                               for j in range(4)))
 
 
 correct = 0
@@ -85,6 +85,7 @@ with torch.no_grad():
         outputs = net(images)
         # the class with the highest energy is what we choose as prediction
         _, predicted = torch.max(outputs.data, 1)
+        print(outputs.data)
         total += labels.size(0)
         correct += (predicted == labels).sum().item()
 
