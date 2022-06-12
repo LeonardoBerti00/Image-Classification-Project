@@ -36,12 +36,12 @@ if (feature_extraction):
 else:   
     print("We will do Finetuning with " + model_name)     #we start with a pretrained model and update all of the model’s parameters for our new task, in essence retraining the whole model.
 print("------- Define Hyper Parameters -------")
-print("epochs   ->   " + epochs)
-print("learningRate   ->   " + learning_rate)
-print("momentum   ->   " + momentum)
-print("transformations   ->   " + transformations)
-print("training_size   ->   " + training_size)
-print("normalization   ->   " + normalization)
+print("epochs   ->   " + str(epochs))
+print("learningRate   ->   " + str(learning_rate))
+print("momentum   ->   " + str(momentum))
+print("transformations   ->   " + str(transformations))
+print("training_size   ->   " + str(training_size))
+print("normalization   ->   " + str(normalization))
 print()
 
 
@@ -151,15 +151,15 @@ def set_parameter_requires_grad(model, feature_extracting):
         for param in model.parameters():
             param.requires_grad = False
 
-def initialize_model(model_name, num_classes, feature_extract=True, use_pretrained=True):
+def initialize_model(model_name, num_classes, feature_extraction, use_pretrained=True):
     model_ft = None
     input_size = 0
 
     if model_name == "vgg":      #VGG11_bn
         model_ft = models.vgg11_bn(pretrained=use_pretrained)
-        set_parameter_requires_grad(model_ft, feature_extract)
+        set_parameter_requires_grad(model_ft, feature_extraction)
         num_ftrs = model_ft.classifier[6].in_features
-        model_ft.classifier[6] = nn.Linear(num_ftrs,num_classes)
+        model_ft.classifier[6] = nn.Linear(num_ftrs,num_classes)      #redefine the last layer with the num of classes of the problem
         input_size = 224
         
     else:
@@ -191,7 +191,7 @@ else:
         if param.requires_grad == True:
             print("\t",name)
 
-optimizer_ft = optim.SGD(params_to_update, learningRate, momentum)
+optimizer_ft = optim.SGD(params_to_update, learning_rate, momentum)
 
 def train_model(model, dataloaders, criterion, optimizer, num_epochs=5):
     since = time.time()
