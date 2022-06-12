@@ -36,12 +36,12 @@ if (feature_extraction):
 else:   
     print("We will do Finetuning with " + model_name)     #we start with a pretrained model and update all of the model’s parameters for our new task, in essence retraining the whole model.
 print("------- Define Hyper Parameters -------")
-print("epochs   ->   " + epochs)
-print("learningRate   ->   " + learning_rate)
-print("momentum   ->   " + momentum)
-print("transformations   ->   " + transformations)
-print("training_size   ->   " + training_size)
-print("normalization   ->   " + normalization)
+print("epochs   ->   " + str(epochs))
+print("learningRate   ->   " + str(learning_rate))
+print("momentum   ->   " + str(momentum))
+print("transformations   ->   " + str(transformations))
+print("training_size   ->   " + str(training_size))
+print("normalization   ->   " + str(normalization))
 print()
 
 
