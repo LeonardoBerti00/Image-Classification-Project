@@ -1,4 +1,4 @@
-# Image-Classification-Project
+# Image Classification Project
 For our project we chose to try to solve a problem given as a competition on the site kaggle.com.
 This is the competition -> https://www.kaggle.com/competitions/the-nature-conservancy-fisheries-monitoring/overview
 
