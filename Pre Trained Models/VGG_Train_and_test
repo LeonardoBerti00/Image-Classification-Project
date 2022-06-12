@@ -103,33 +103,40 @@ class fishDataset(Dataset):
         return img, label
 
 if (transformations):
-  transformation = T.Compose([
+  if (normalization):
+    transformation = T.Compose([
+        T.ToPILImage(),
+        T.Resize((height, width)),
+        T.RandomRotation(degrees=(0, 360)),
+        T.RandomHorizontalFlip(p=0.5),
+        T.RandomVerticalFlip(p=0.5),
+        T.RandomAffine(degrees=0.0, translate=(0.1, 0.3)),
+        T.ToTensor(),
+        T.Normalize([0.4043, 0.4353, 0.3999], [0.2250, 0.2183, 0.2125]),
+        ])
+  else:
+    transformation = T.Compose([
+        T.ToPILImage(),
+        T.Resize((height, width)),
+        T.RandomRotation(degrees=(0, 360)),
+        T.RandomHorizontalFlip(p=0.5),
+        T.RandomVerticalFlip(p=0.5),
+        T.RandomAffine(degrees=0.0, translate=(0.1, 0.3)),
+        T.ToTensor(),
+        ])
+else:
+  if (normalization):
+    transformation = T.Compose([
       T.ToPILImage(),
-      # T.TrivialAugmentWide(),
-      # T.RandomCrop(size=(width, height)),
-      # T.RandomInvert(p=0.5),
-      # T.RandomPosterize(bits=2, p=0.5),
-      # T.RandomAdjustSharpness(sharpness_factor=2, p=0.5),
-      # T.RandomAutocontrast(p=0.5),
-      # T.RandomEqualize(p=0.5),
-      # T.AutoAugment(),
       T.Resize((height, width)),
-      # T.RandomPerspective(p=0.5),
-      T.RandomRotation(degrees=(0, 360)),
-      T.RandomHorizontalFlip(p=0.5),
-      T.RandomVerticalFlip(p=0.5),
-      T.RandomAffine(degrees=0.0, translate=(0.1, 0.3)),
-      # T.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.5),
-      #T.Grayscale(),
       T.ToTensor(),
       T.Normalize([0.4043, 0.4353, 0.3999], [0.2250, 0.2183, 0.2125]),
       ])
-else:
-  transformation = T.Compose([
+  else:
+    transformation = T.Compose([
       T.ToPILImage(),
       T.Resize((height, width)),
       T.ToTensor(),
-      T.Normalize([0.4043, 0.4353, 0.3999], [0.2250, 0.2183, 0.2125]),
       ])
 
 
