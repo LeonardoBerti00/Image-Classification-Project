@@ -16,9 +16,10 @@ from torchvision import models
 
 torch.cuda.empty_cache()
 
+#these hyperparameters are the ones with which we got the best result
 batchSize = 8
 epochs = 20
-learningRate = 1e-4
+learning_rate = 1e-4
 momentum = 0.9
 width = 224     # 800
 height = 224   # 474  237
@@ -46,7 +47,7 @@ print()
 
 # define the device for the computation
 device = "cuda" if torch.cuda.is_available() else "cpu"
-print(device)
+
 class fishDataset(Dataset):
     def __init__(self, img_dir, labels_dir, trans=None):
 
@@ -101,7 +102,7 @@ class fishDataset(Dataset):
 
         return img, label
 
-if (rotation):
+if (transformations):
   transformation = T.Compose([
       T.ToPILImage(),
       # T.TrivialAugmentWide(),
