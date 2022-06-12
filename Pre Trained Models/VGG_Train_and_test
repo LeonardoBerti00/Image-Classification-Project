@@ -151,15 +151,15 @@ def set_parameter_requires_grad(model, feature_extracting):
         for param in model.parameters():
             param.requires_grad = False
 
-def initialize_model(model_name, num_classes, feature_extract=True, use_pretrained=True):
+def initialize_model(model_name, num_classes, feature_extraction, use_pretrained=True):
     model_ft = None
     input_size = 0
 
     if model_name == "vgg":      #VGG11_bn
         model_ft = models.vgg11_bn(pretrained=use_pretrained)
-        set_parameter_requires_grad(model_ft, feature_extract)
+        set_parameter_requires_grad(model_ft, feature_extraction)
         num_ftrs = model_ft.classifier[6].in_features
-        model_ft.classifier[6] = nn.Linear(num_ftrs,num_classes)
+        model_ft.classifier[6] = nn.Linear(num_ftrs,num_classes)      #redefine the last layer with the num of classes of the problem
         input_size = 224
         
     else:
