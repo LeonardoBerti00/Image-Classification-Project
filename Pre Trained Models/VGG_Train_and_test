@@ -191,7 +191,7 @@ else:
         if param.requires_grad == True:
             print("\t",name)
 
-optimizer_ft = optim.SGD(params_to_update, learningRate, momentum)
+optimizer_ft = optim.SGD(params_to_update, learning_rate, momentum)
 
 def train_model(model, dataloaders, criterion, optimizer, num_epochs=5):
     since = time.time()
