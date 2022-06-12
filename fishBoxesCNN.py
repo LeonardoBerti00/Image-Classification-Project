@@ -13,10 +13,10 @@ torch.cuda.empty_cache()
 # accuracy: 60.6% without NoF
 # accuracy: 54.1% with NoF
 
-batchSize = 16
-epochs = 3
-learningRate = 1e-4
-momentum = 0.1
+batchSize = 100
+epochs = 100
+learningRate = 1e-3
+momentum = 0.9
 width = 227     # 227
 height = 155    # 155
 
@@ -88,13 +88,15 @@ transformation = T.Compose([
     # T.AutoAugment(),
     T.Resize((height, width)),
     # T.RandomPerspective(p=0.5),
-    T.RandomRotation(degrees=(0, 360)),
-    T.RandomHorizontalFlip(p=0.5),
-    T.RandomVerticalFlip(p=0.5),
-    T.RandomAffine(degrees=0.0, translate=(0.1, 0.3)),
+    # T.RandomRotation(degrees=(0, 360)),
+    # T.RandomHorizontalFlip(p=0.5),
+    # T.RandomVerticalFlip(p=0.5),
+    # T.RandomAffine(degrees=0.0, translate=(0.1, 0.3)),
     # T.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.5),
-    T.Grayscale(),
-    T.ToTensor()])
+    # T.Grayscale(),
+    T.ToTensor(),
+    T.Normalize((0.4042, 0.4353, 0.3998), (0.2251, 0.2185, 0.2127))
+])
 
 dataset = fishDataset("FishBoxes/Fishes/",
                       "FishBoxes/labels.csv", trans=transformation)
@@ -114,65 +116,85 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 # define our CNN
 
 
+# class myCNN(nn.Module):
+#     def __init__(self):
+#         super().__init__()
+#         self.vgg = nn.Sequential(
+#             nn.Conv2d(3, 64, 3, padding=1),
+#             nn.ReLU(),
+#             nn.Conv2d(64, 64, 3, padding=1),
+#             nn.ReLU(),
+
+#             nn.MaxPool2d(2, stride=2),
+
+#             nn.Conv2d(64, 128, 3, padding=1),
+#             nn.ReLU(),
+#             nn.Conv2d(128, 128, 3, padding=1),
+#             nn.ReLU(),
+
+#             nn.MaxPool2d(2, stride=2),
+
+#             nn.Conv2d(128, 256, 3, padding=1),
+#             nn.ReLU(),
+#             nn.Conv2d(256, 256, 3, padding=1),
+#             nn.ReLU(),
+#             nn.Conv2d(256, 256, 1),
+#             nn.ReLU(),
+
+#             nn.MaxPool2d(2, stride=2),
+
+#             nn.Conv2d(256, 512, 3, padding=1),
+#             nn.ReLU(),
+#             nn.Conv2d(512, 512, 3, padding=1),
+#             nn.ReLU(),
+#             nn.Conv2d(512, 512, 1),
+#             nn.ReLU(),
+
+#             nn.MaxPool2d(2, stride=2),
+
+#             nn.Conv2d(512, 512, 3, padding=1),
+#             nn.ReLU(),
+#             nn.Conv2d(512, 512, 3, padding=1),
+#             nn.ReLU(),
+#             nn.Conv2d(512, 512, 1),
+#             nn.ReLU(),
+
+#             nn.MaxPool2d(2, stride=2))
+
+#         self.dense = nn.Sequential(
+#             nn.Linear(14336, 4096),
+#             nn.ReLU(),
+#             nn.Linear(4096, 4096),
+#             nn.ReLU(),
+#             nn.Linear(4096, 8),
+#             # nn.ReLU()
+#         )
+
+#     def forward(self, x):
+#         out = self.vgg(x)
+#         out = torch.flatten(out, 1)
+#         out = self.dense(out)
+#         return out
+
 class myCNN(nn.Module):
     def __init__(self):
         super().__init__()
-        self.vgg = nn.Sequential(
-            nn.Conv2d(1, 64, 3, padding=1),
-            nn.ReLU(),
-            nn.Conv2d(64, 64, 3, padding=1),
-            nn.ReLU(),
 
-            nn.MaxPool2d(2, stride=2),
-
-            nn.Conv2d(64, 128, 3, padding=1),
-            nn.ReLU(),
-            nn.Conv2d(128, 128, 3, padding=1),
-            nn.ReLU(),
-
-            nn.MaxPool2d(2, stride=2),
-
-            nn.Conv2d(128, 256, 3, padding=1),
-            nn.ReLU(),
-            nn.Conv2d(256, 256, 3, padding=1),
-            nn.ReLU(),
-            nn.Conv2d(256, 256, 1),
-            nn.ReLU(),
-
-            nn.MaxPool2d(2, stride=2),
-
-            nn.Conv2d(256, 512, 3, padding=1),
-            nn.ReLU(),
-            nn.Conv2d(512, 512, 3, padding=1),
-            nn.ReLU(),
-            nn.Conv2d(512, 512, 1),
-            nn.ReLU(),
-
-            nn.MaxPool2d(2, stride=2),
-
-            nn.Conv2d(512, 512, 3, padding=1),
-            nn.ReLU(),
-            nn.Conv2d(512, 512, 3, padding=1),
-            nn.ReLU(),
-            nn.Conv2d(512, 512, 1),
-            nn.ReLU(),
-
-            nn.MaxPool2d(2, stride=2))
-
-        self.dense = nn.Sequential(
-            nn.Linear(43008, 4096),
-            nn.ReLU(),
-            nn.Linear(4096, 4096),
-            nn.ReLU(),
-            nn.Linear(4096, 8),
-            # nn.ReLU()
-        )
+        self.conv1 = nn.Conv2d(3, 20, 5)
+        self.pool = nn.MaxPool2d(2, 2)
+        self.conv2 = nn.Conv2d(20, 16, 5)
+        self.fc1 = nn.Linear(29680, 120)
+        self.fc2 = nn.Linear(120, 84)
+        self.fc3 = nn.Linear(84, 8)
 
     def forward(self, x):
-        out = self.vgg(x)
-        out = torch.flatten(out, 1)
-        out = self.dense(out)
-        return out
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool(F.relu(self.conv2(x)))
+        x = torch.flatten(x, 1)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        return x
 
 
 # instance of our model
@@ -207,7 +229,7 @@ def trainingLoop(train_dataloader, model, loss_fn, optimizer):
         loss.backward()
         optimizer.step()
 
-        if batch % 20 == 0:
+        if batch % 5 == 0:
             print(f"The loss is {loss.item()}")
 
 

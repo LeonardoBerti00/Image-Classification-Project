@@ -28,8 +28,7 @@ def trainModelOnData(trainLoader, model, epochs=10, batch_size=32, lrate=0.001, 
 
     start_time = time.time()
 
-    # model.to(device)
-    model.cuda()
+    model.to(device)
 
     criterion = torch.nn.CrossEntropyLoss()
 
