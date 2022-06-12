@@ -29,14 +29,18 @@ transformations = True       #if true we apply some transformations to the image
 training_size = 0.8
 normalization = True         #if True we apply Normalization to the images
 
-print("Hyper Parameters")
-print(feature_extraction)
-print(epochs)
-print(learningRate)
-print(momentum)
-print(rotation)
-print(training_size)
-print(normalization)
+
+if (feature_extraction):             
+    print("We will do Feature Extraction with " + model_name)   #we start with a pretrained model and only update the final layer weights from which we derive predictions
+else:   
+    print("We will do Finetuning with " + model_name)     #we start with a pretrained model and update all of the model’s parameters for our new task, in essence retraining the whole model.
+print("------- Define Hyper Parameters -------")
+print("epochs   ->   " + epochs)
+print("learningRate   ->   " + learning_rate)
+print("momentum   ->   " + momentum)
+print("transformations   ->   " + transformations)
+print("training_size   ->   " + training_size)
+print("normalization   ->   " + normalization)
 print()
 
 
