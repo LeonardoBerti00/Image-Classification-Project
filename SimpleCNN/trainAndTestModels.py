@@ -32,6 +32,7 @@ def trainModelOnData(trainLoader, model, epochs=10, batch_size=32, lrate=0.001, 
     criterion = torch.nn.CrossEntropyLoss()
 
     optimizer = optim.SGD(model.parameters(), lr=lrate, momentum=momen)
+    # optimizer = optim.AdamW(model.parameters(), lr=lrate)
 
     for epoch in range(epochs):
         running_loss = 0.0
@@ -135,14 +136,14 @@ if __name__ == "__main__":
     numWorkers = 0  # [0..6]
     epochs = 30
     batch_size = 64
-    imgWidth = 227
-    imgHeight = 155
+    imgWidth = 224
+    imgHeight = 224
     lrate = 0.001
     momentum = 0.9
     transformations = []
     testWhileTraining = True
     saveModel = True
-    modelName = "simpleModel"
+    modelName = "simpleModelWithAdamW"
 
     trainloader, testloader = loadFishDataset(
         "FishBoxes/Fishes/", "FishBoxes/labels.csv", dataSplit, transformations, numWorkers)
@@ -161,13 +162,13 @@ if __name__ == "__main__":
 
     if saveModel:
         modelName = f'{modelName}_{accuracy:.1f}%'
-        savePath = "./SavedModels/" + modelName
+        savePath = "./SimpleCNN/SavedModels/" + modelName
         if not os.path.exists(savePath):
             os.makedirs(savePath)
 
         with open(savePath + "/" + modelName + ".txt", "w") as file:
             file.write(
-                f'Accuracy of the final network on the test images: {accuracy} %\n\n')
+                f'Accuracy of the final network on the test images: {accuracy:.1f} %\n\n')
             file.write(f'Train and test data split: {dataSplit*100:.0f}%\n')
             file.write(
                 f'Size of the images during the training is : {imgWidth}x{imgHeight}\n')
