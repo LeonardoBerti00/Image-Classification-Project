@@ -134,7 +134,7 @@ if __name__ == "__main__":
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     dataSplit = 0.8
     numWorkers = 0  # [0..6]
-    epochs = 30
+    epochs = 20
     batch_size = 64
     imgWidth = 227
     imgHeight = 155
@@ -143,7 +143,7 @@ if __name__ == "__main__":
     transformations = []
     testWhileTraining = True
     saveModel = True
-    modelName = "net_30e"
+    modelName = "net_20e"
 
     trainloader, testloader = loadFishDataset(
         "FishBoxes/Fishes/", "FishBoxes/labels.csv", dataSplit, transformations, numWorkers)
