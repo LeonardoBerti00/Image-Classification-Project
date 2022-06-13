@@ -139,8 +139,8 @@ else:
       ])
 
 
-dataset = fishDataset("drive/MyDrive/Image-Classification-Project/FishBoxes/Fishes/",
-                      "drive/MyDrive/Image-Classification-Project/FishBoxes/labels.csv", trans=transformation)
+dataset = fishDataset("Image-Classification-Project/FishBoxes/Fishes/",
+                      "Image-Classification-Project/FishBoxes/labels.csv", trans=transformation)
 
 train_size = int(training_size * len(dataset))
 test_size = len(dataset) - train_size
