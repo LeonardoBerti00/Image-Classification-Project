@@ -10,13 +10,10 @@ import torch.nn.functional as F
 
 torch.cuda.empty_cache()
 
-# accuracy: 60.6% without NoF
-# accuracy: 54.1% with NoF
-
-batchSize = 8
-epochs = 3
+batchSize = 32
+epochs = 1
 learningRate = 1e-4
-momentum = 0.1
+momentum = 0.9
 width = 227     # 227
 height = 155    # 155
 
@@ -88,15 +85,15 @@ transformation = T.Compose([
     # T.RandomEqualize(p=0.5),
     # T.AutoAugment(),
     T.Resize((height, width)),
-    # T.RandomPerspective(p=0.5),
+    T.RandomPerspective(p=0.5),
     T.RandomRotation(degrees=(0, 360)),
     T.RandomHorizontalFlip(p=0.5),
     T.RandomVerticalFlip(p=0.5),
-    T.RandomAffine(degrees=0.0, translate=(0.1, 0.3)),
+    # T.RandomAffine(degrees=0.0, translate=(0.1, 0.3)),
     # T.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.5),
-    T.Grayscale(),
+    # T.Grayscale(),
     T.ToTensor(),
-    T.Normalize((0.4219), (0.2113))])
+    T.Normalize((0.4042, 0.4353, 0.3998), (0.2251, 0.2185, 0.2127))])
 
 dataset = fishDataset("FishBoxes/Fishes/",
                       "FishBoxes/labels.csv", trans=transformation)
@@ -111,23 +108,23 @@ train_dataloader = DataLoader(
 test_dataloader = DataLoader(test_data, batch_size=batchSize, shuffle=False)
 
 
-def ComputeMeanandSTD(dataloader):  # function to compute Mean and STD to normalize
-    # to Normalize = x - mean / std
-    channels_sum, channels_squared_sum, num_batches = 0, 0, 0
-    for data, _ in dataloader:
-        # Mean over batch, height and width, but not over the channels
-        channels_sum += torch.mean(data, dim=[0, 2, 3])
-        channels_squared_sum += torch.mean(data**2, dim=[0, 2, 3])
-        num_batches += 1
+# def ComputeMeanandSTD(dataloader):  # function to compute Mean and STD to normalize
+#     # to Normalize = x - mean / std
+#     channels_sum, channels_squared_sum, num_batches = 0, 0, 0
+#     for data, _ in dataloader:
+#         # Mean over batch, height and width, but not over the channels
+#         channels_sum += torch.mean(data, dim=[0, 2, 3])
+#         channels_squared_sum += torch.mean(data**2, dim=[0, 2, 3])
+#         num_batches += 1
 
-    mean = channels_sum / num_batches
+#     mean = channels_sum / num_batches
 
-    # std = sqrt(E[X^2] - (E[X])^2)
-    std = (channels_squared_sum / num_batches - mean ** 2) ** 0.5
-    # output
-    print('mean: ' + str(mean))
-    print('std:  ' + str(std))
-    return mean, std
+#     # std = sqrt(E[X^2] - (E[X])^2)
+#     std = (channels_squared_sum / num_batches - mean ** 2) ** 0.5
+#     # output
+#     print('mean: ' + str(mean))
+#     print('std:  ' + str(std))
+#     return mean, std
 
 # ComputeMeanandSTD(train_size)
 
@@ -142,7 +139,7 @@ class myCNN(nn.Module):
     def __init__(self):
         super().__init__()
         self.vgg = nn.Sequential(
-            nn.Conv2d(1, 64, 3, padding=1),
+            nn.Conv2d(3, 64, 3, padding=1),
             nn.ReLU(),
             nn.Conv2d(64, 64, 3, padding=1),
             nn.ReLU(),
@@ -184,7 +181,7 @@ class myCNN(nn.Module):
             nn.MaxPool2d(2, stride=2))
 
         self.dense = nn.Sequential(
-            nn.Linear(43008, 4096),
+            nn.Linear(14336, 4096),
             nn.ReLU(),
             nn.Linear(4096, 4096),
             nn.ReLU(),
@@ -265,7 +262,43 @@ for e in range(epochs):
     testLoop(test_dataloader, model, loss_fn)
     print("------------End of Epoch {}/{}------------".format(e, epochs-1))
 
-if acc > 54:
-    modelName = "model_NoF_" + str(acc) + ".pth"
-    torch.save(model.state_dict(), modelName)
-    print("Model saved as " + modelName)
+
+classes = ("ALB", "BET", "DOL", "LAG", "NoF", "OTHER", "SHARK", "YFT")
+
+
+correct_pred = {classname: 0 for classname in classes}
+total_pred = {classname: 0 for classname in classes}
+
+# again no gradients needed
+with torch.no_grad():
+    for data in test_dataloader:
+        images, labels = data
+        images = images.to(device)
+        labels = labels.to(device)
+        outputs = model(images)
+        _, predictions = torch.max(outputs, 1)
+        # collect the correct predictions for each class
+        for label, prediction in zip(labels, predictions):
+            if label == prediction:
+                correct_pred[classes[label]] += 1
+            total_pred[classes[label]] += 1
+
+accPerClass = {}
+# print accuracy for each class
+for classname, correct_count in correct_pred.items():
+    accuracy = 100 * float(correct_count) / total_pred[classname]
+    accPerClass[classname] = accuracy
+
+    # print(f'Accuracy for class: {classname:5s} is {accuracy:.1f} %')
+
+d_view = [(v, k) for k, v in accPerClass.items()]
+d_view.sort(reverse=True)  # natively sort tuples by first element
+for v, k in d_view:
+    # print("%s: %d" % (k, v))
+    print(f'Accuracy for class: {k:6s} is {v:.1f} %')
+
+
+# if acc > 54:
+#     modelName = "model_NoF_" + str(acc) + ".pth"
+#     torch.save(model.state_dict(), modelName)
+#     print("Model saved as " + modelName)

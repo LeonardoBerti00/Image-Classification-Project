@@ -1,0 +1,9 @@
+Accuracy of the final network on the test images: 86.8 %
+
+Train and test data split: 80%
+Size of the images during the training is : 224x155
+Epochs: 20
+Batch size: 64
+Learning rate: 0.002
+Momentum: 0.9
+Transformations: []

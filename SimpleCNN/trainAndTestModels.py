@@ -128,6 +128,44 @@ def loadFishDataset(imagesPath, labelsPath, split=0.8, transformations=[], numWo
     return trainloader, testloader
 
 
+def testModelOnClasses(data, model, device="cpu"):
+    classes = ("ALB", "BET", "DOL", "LAG", "NoF", "OTHER", "SHARK", "YFT")
+
+    correct_pred = {classname: 0 for classname in classes}
+
+    total_pred = {classname: 0 for classname in classes}
+
+    # again no gradients needed
+    with torch.no_grad():
+        for data in testloader:
+            images, labels = data
+            images = images.to(device)
+            labels = labels.to(device)
+            outputs = model(images)
+            _, predictions = torch.max(outputs, 1)
+            # collect the correct predictions for each class
+            for label, prediction in zip(labels, predictions):
+                if label == prediction:
+                    correct_pred[classes[label]] += 1
+                total_pred[classes[label]] += 1
+
+    accPerClass = {}
+    # print accuracy for each class
+    for classname, correct_count in correct_pred.items():
+        accuracy = 100 * float(correct_count) / total_pred[classname]
+        accPerClass[classname] = accuracy
+
+        # print(f'Accuracy for class: {classname:5s} is {accuracy:.1f} %')
+
+    d_view = [(v, k) for k, v in accPerClass.items()]
+    d_view.sort(reverse=True)  # natively sort tuples by first element
+    for v, k in d_view:
+        # print("%s: %d" % (k, v))
+        print(f'Accuracy for class: {k:6s} is {v:.1f} %')
+
+    return accPerClass
+
+
 if __name__ == "__main__":
     # standardizzare i dati di test e di train (in csv separati così i risultati dovrebbero essere più consistenti)
     model = SimpleModel()
@@ -136,14 +174,14 @@ if __name__ == "__main__":
     numWorkers = 0  # [0..6]
     epochs = 30
     batch_size = 64
-    imgWidth = 224
-    imgHeight = 224
+    imgWidth = 227
+    imgHeight = 155
     lrate = 0.001
     momentum = 0.9
     transformations = []
     testWhileTraining = True
     saveModel = True
-    modelName = "simpleModelWithAdamW"
+    modelName = "simpleModelSGD"
 
     trainloader, testloader = loadFishDataset(
         "FishBoxes/Fishes/", "FishBoxes/labels.csv", dataSplit, transformations, numWorkers)
@@ -159,6 +197,8 @@ if __name__ == "__main__":
 
     print(
         f'Accuracy of the final network on the test images: {accuracy:.1f} %')
+
+    testModelOnClasses(testloader, model, device)
 
     if saveModel:
         modelName = f'{modelName}_{accuracy:.1f}%'

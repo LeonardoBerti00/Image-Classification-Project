@@ -5,7 +5,7 @@ import torchvision
 import torchvision.transforms as transforms
 from fishDataset import fishDataset
 from torch.utils.data import Dataset, DataLoader
-from CNNmodels import Net, vgg16
+from CNNmodel import *
 import torch.optim as optim
 
 classes = ("ALB", "BET", "DOL", "LAG", "NoF", "OTHER", "SHARK", "YFT")
@@ -40,9 +40,8 @@ images, labels = dataiter.next()
 
 images = images.to(device)
 
-PATH = './2.0/savedModels/net_20e_88%.pth'
-# net = vgg16()
-net = Net()
+PATH = './SimpleCNN/SavedModels/simpleModelWithAdamW_86.8%/simpleModelWithAdamW_86.8%.pth'
+net = SimpleModel()
 net.load_state_dict(torch.load(PATH))
 net.to(device)
 
