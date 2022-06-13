@@ -12,21 +12,20 @@ import pandas as pd
 import time
 import copy
 import shutil
+#from google.colab import drive
 from torchvision import models
 
-torch.cuda.empty_cache()
-
-#these hyperparameters are the ones with which we got the best result
+#drive.mount('/content/drive')
 batchSize = 8
 epochs = 20
 learning_rate = 1e-4
-momentum = 0.9
+momentum = 0.8
 width = 224     # 800
 height = 224   # 474  237
 num_classes = 8
-feature_extraction = True
-model_name = "vgg"
-transformations = True       #if true we apply some transformations to the images
+feature_extraction = False
+model_name = "alexnet"
+transformations = False       #if true we apply some transformations to the images
 training_size = 0.8
 normalization = True         #if True we apply Normalization to the images
 
@@ -103,33 +102,40 @@ class fishDataset(Dataset):
         return img, label
 
 if (transformations):
-  transformation = T.Compose([
+  if (normalization):
+    transformation = T.Compose([
+        T.ToPILImage(),
+        T.Resize((height, width)),
+        T.RandomRotation(degrees=(0, 360)),
+        T.RandomHorizontalFlip(p=0.5),
+        T.RandomVerticalFlip(p=0.5),
+        T.RandomAffine(degrees=0.0, translate=(0.1, 0.3)),
+        T.ToTensor(),
+        T.Normalize([0.4043, 0.4353, 0.3999], [0.2250, 0.2183, 0.2125]),
+        ])
+  else:
+    transformation = T.Compose([
+        T.ToPILImage(),
+        T.Resize((height, width)),
+        T.RandomRotation(degrees=(0, 360)),
+        T.RandomHorizontalFlip(p=0.5),
+        T.RandomVerticalFlip(p=0.5),
+        T.RandomAffine(degrees=0.0, translate=(0.1, 0.3)),
+        T.ToTensor(),
+        ])
+else:
+  if (normalization):
+    transformation = T.Compose([
       T.ToPILImage(),
-      # T.TrivialAugmentWide(),
-      # T.RandomCrop(size=(width, height)),
-      # T.RandomInvert(p=0.5),
-      # T.RandomPosterize(bits=2, p=0.5),
-      # T.RandomAdjustSharpness(sharpness_factor=2, p=0.5),
-      # T.RandomAutocontrast(p=0.5),
-      # T.RandomEqualize(p=0.5),
-      # T.AutoAugment(),
       T.Resize((height, width)),
-      # T.RandomPerspective(p=0.5),
-      T.RandomRotation(degrees=(0, 360)),
-      T.RandomHorizontalFlip(p=0.5),
-      T.RandomVerticalFlip(p=0.5),
-      T.RandomAffine(degrees=0.0, translate=(0.1, 0.3)),
-      # T.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.5),
-      #T.Grayscale(),
       T.ToTensor(),
       T.Normalize([0.4043, 0.4353, 0.3999], [0.2250, 0.2183, 0.2125]),
       ])
-else:
-  transformation = T.Compose([
+  else:
+    transformation = T.Compose([
       T.ToPILImage(),
       T.Resize((height, width)),
       T.ToTensor(),
-      T.Normalize([0.4043, 0.4353, 0.3999], [0.2250, 0.2183, 0.2125]),
       ])
 
 
@@ -145,21 +151,23 @@ test_dataloader = DataLoader(test_data, batch_size=batchSize, shuffle=False)
 
 dataloaders = {'train': train_dataloader, 'val': test_dataloader}
 
-
+#if we are feature extracting and only want to compute gradients for the newly initialized layer then we want all of the other parameters to not require gradients.
 def set_parameter_requires_grad(model, feature_extracting):
     if feature_extracting:
         for param in model.parameters():
             param.requires_grad = False
 
-def initialize_model(model_name, num_classes, feature_extraction, use_pretrained=True):
+def initialize_model(model_name, num_classes, feature_extract=True, use_pretrained=True):
     model_ft = None
     input_size = 0
 
-    if model_name == "vgg":      #VGG11_bn
-        model_ft = models.vgg11_bn(pretrained=use_pretrained)
-        set_parameter_requires_grad(model_ft, feature_extraction)
+    if model_name == "alexnet":
+        """ Alexnet
+        """
+        model_ft = models.alexnet(pretrained=use_pretrained)
+        set_parameter_requires_grad(model_ft, feature_extract)
         num_ftrs = model_ft.classifier[6].in_features
-        model_ft.classifier[6] = nn.Linear(num_ftrs,num_classes)      #redefine the last layer with the num of classes of the problem
+        model_ft.classifier[6] = nn.Linear(num_ftrs,num_classes)
         input_size = 224
         
     else:
