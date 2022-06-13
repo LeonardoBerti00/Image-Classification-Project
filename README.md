@@ -17,4 +17,5 @@ In VGG there is our implementation of the famous CNN [VGG](https://arxiv.org/pdf
 
 In SimpleCNN there is an implementation of a simple CNN with 2 conv layers e 1 pool.
 
-For more information, we wrote a short report with the methods used and the results:  https://docs.google.com/document/d/13B4Z0PlE7_ozwVeMN_uXxhOzC2ui6S9_dmj-0-3gPtk
+For more information, we wrote a short report with the methods used and the results:  
+https://docs.google.com/document/d/1zyMTFjX7au9mo7Lylf6u2lcKsOLbp-MLOckocrxX_cQ
