@@ -13,7 +13,7 @@ In CreateDataset there are the scripts that we wrote to create the dataset:
 
 In Pre Trained Models there are the scrpts to load and utilize some pre trained pytorch models.
 
-In VGG there is the our implementation of the famous CNN [VGG](https://arxiv.org/pdf/1409.1556.pdf).
+In VGG there is our implementation of the famous CNN [VGG](https://arxiv.org/pdf/1409.1556.pdf).
 
 In SimpleCNN there is an implementation of a simple CNN with 2 conv layers e 1 pool.
 
