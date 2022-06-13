@@ -11,7 +11,7 @@ In CreateDataset there are the scripts that we wrote to create the dataset:
   - CreateDataset/extractFish.py   this is the script we used to extract the fishes from the original dataset
   - CreateDataset/BuildDataset.py   this is the script we used to create the file with the labels -> FishBoxes/labels.csv
 
-In Pre Trained Models there are the scripts to load and utilize some pre trained pytorch models, and one AlexNet model that perform acc = 0.9638.
+In Pre Trained Models there are the scripts to load and utilize some pre trained pytorch models with the finetuning (default) or feature extraction technique, to switch from one technique to another you simply need to change the variable boolean feature extraction, there is also one AlexNet model that perform acc = 0.9638.
 
 In VGG there is our implementation of the famous CNN [VGG](https://arxiv.org/pdf/1409.1556.pdf).
 
