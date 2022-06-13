@@ -24,11 +24,11 @@ momentum = 0.9
 width = 224    
 height = 224   
 num_classes = 8
-feature_extraction = True    #if False we will do Finetuning
+feature_extraction = False    #if False we will do Finetuning
 model_name = "vgg"
-transformations = True       #if true we apply some transformations to the images
+transformations = False       #if true we apply some transformations to the images
 training_size = 0.8
-normalization = True         #if True we apply Normalization to the images
+normalization = False         #if True we apply Normalization to the images
 
 
 if (feature_extraction):             
