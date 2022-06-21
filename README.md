@@ -19,3 +19,5 @@ In SimpleCNN there is an implementation of a simple CNN with 2 conv layers e 1 p
 
 For more information, we wrote a short report with the methods used and the results:  
 https://docs.google.com/document/d/1zyMTFjX7au9mo7Lylf6u2lcKsOLbp-MLOckocrxX_cQ
+
+PS. We often programm at the same time in call, in which we also did the review of the code, so the commits are really confusing.
