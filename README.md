@@ -1,5 +1,5 @@
 # Image Classification Project
-This is a project in which me and two friends try to solve a problem given as a competition on the site kaggle.com.
+This is a project in which we try to solve a problem given as a competition on the site kaggle.com.
 This is the competition -> https://www.kaggle.com/competitions/the-nature-conservancy-fisheries-monitoring/overview
 
 In this competition the goal was to automatically detect and classify species of tunas, sharks and more that fishing vessels catch. The images are collected by analyzing frame by frame the footage captured by the on-board cameras. The ultimate goal is to ease the monitoring of fishing activities to fill science and compliance monitoring gaps in order to have a positive impact on the oceans.
