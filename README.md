@@ -22,5 +22,3 @@ https://docs.google.com/document/d/1zyMTFjX7au9mo7Lylf6u2lcKsOLbp-MLOckocrxX_cQ
 
 We did also a presentation for school reasons:
 https://drive.google.com/file/d/1C5uhNpLBTfxDMl0cVUAujFhLB_wN9Ip1/view?usp=sharing
-
-PS. We often program at the same time in call, in which we also did the review of the code, so the commits are really confusing.
